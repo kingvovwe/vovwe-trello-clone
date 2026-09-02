@@ -9,9 +9,9 @@ export const login = async (req, res) => {
 
         console.log("Login")
 
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        const user = await SUser.findOne({ username });
+        const user = await SUser.findOne({ email });
 
         if(!user) {
             const errRes = jsonRes(false, `Incorrect Details`, null)
@@ -28,8 +28,7 @@ export const login = async (req, res) => {
         }
 
         const jwtPayload = {
-            id: user._id,
-            username
+            id: user._id
         };
 
         const accessToken = genJwtToken(jwtPayload, JWT_ACCESS_SECRET, "15m");
@@ -38,25 +37,25 @@ export const login = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none',
+            // sameSite: 'none',
             maxAge: 15 * 60 * 1000
         })
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none',
+            // sameSite: 'none',
             maxAge: 7 * 60 * 60 * 24 * 1000
         })
-
-        const successRes = jsonRes(true, `Welcome Back ${username}`, user);
+        
+        const successRes = jsonRes(true, `Welcome Back ${user.name}`, user);
 
         res.status(200).json(successRes);
 
 
 
     } catch (e) {
-        const errRes = jsonRes(false, `Failed to login: ${e.message}`, null)
+        const errRes = jsonRes(false, `Failed to login`, e.message)
         res.status(400).json(errRes);
     }
 }
@@ -64,17 +63,17 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
     try {
 
-        const { name, email, username, password } = req.body;
+        const { name, email, password } = req.body;
 
-        const hashPass = hash(password, 10);
+        const hashPass = await hash(password, 10);
 
         const user = await SUser.create({
-            name, email, username, password: hashPass
+            name, email, password: hashPass
         });
 
+
         const jwtPayload = {
-            id: user._id,
-            username
+            id: user._id
         };
 
         const accessToken = genJwtToken(jwtPayload, JWT_ACCESS_SECRET, "15m");
@@ -83,24 +82,24 @@ export const register = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none',
+            // sameSite: 'none',
             maxAge: 15 * 60 * 1000
         })
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none',
+            // sameSite: 'none',
             maxAge: 7 * 60 * 60 * 24 * 1000
         })
 
-        const successRes = jsonRes(true, `Successfully Registered ${username}`, user);
+        const successRes = jsonRes(true, `Successfully Registered ${name}`,  user);
 
         res.status(200).json(successRes);
 
 
     } catch (e) {
-        const errRes = jsonRes(false, `Failed to register: ${e.message}`, null)
+        const errRes = jsonRes(false, `Failed to register`, e.message)
         res.status(400).json(errRes);
     }
 }
@@ -110,17 +109,23 @@ export const refreshToken = async (req, res) => {
 
         const refreshToken = req.cookies.refreshToken;
 
+        if(!refreshToken) {
+            console.log(req.cookies);
+            const errRes = jsonRes(false, `Not Logged In`, null)
+            res.status(400).json(errRes);
+            return;
+        }
+
         const isTokenValid = verifyToken(refreshToken, JWT_REFRESH_SECRET);
 
         if(!isTokenValid) {
-            const errRes = jsonRes(false, `Please Login`, null)
+            const errRes = jsonRes(false, `Invalid Token`, null)
             res.status(400).json(errRes);
             return;
         }
 
         const jwtPayload = {
-            id: isTokenValid.id,
-            username: isTokenValid.username
+            id: isTokenValid.id
         };
 
         const accessToken = genJwtToken(jwtPayload, JWT_ACCESS_SECRET, '15m');
@@ -128,7 +133,7 @@ export const refreshToken = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none',
+            // sameSite: 'none',
             maxAge: 15 * 60 * 1000
         });
 
@@ -140,7 +145,7 @@ export const refreshToken = async (req, res) => {
 
 
     } catch (e) {
-        const errRes = jsonRes(false, `Failed to refresh token: ${e.message}`, null)
+        const errRes = jsonRes(false, `Failed to refresh token`, e.message)
         res.status(400).json(errRes);
     }
 }

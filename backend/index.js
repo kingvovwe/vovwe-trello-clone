@@ -5,6 +5,8 @@ import { API_PREFIX, PORT } from "./config/env.config.js";
 import { logger } from "./middleware/basic.middleware.js";
 
 import authRoute from './router/auth.router.js'
+import boardRoute from "./router/board.router.js";
+
 import { connDB } from "./config/db.config.js";
 
 const app = express();
@@ -14,16 +16,12 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(`${API_PREFIX}/auth`, authRoute);
-
-console.log("Registering test route");
-
+app.use(`${API_PREFIX}/board`, boardRoute);
 
 
 (async () => {
 
     try {
-
-        console.log(API_PREFIX);
 
         await connDB();
 
