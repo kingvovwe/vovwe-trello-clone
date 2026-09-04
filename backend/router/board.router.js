@@ -2,7 +2,7 @@ import { Router } from "express"
 import { body } from "express-validator"
 
 import { validateInput, isUserLoggedIn } from "../middleware/validation.middleware.js";
-import { createBoard, createColumn, getBoards, getABoardAndChildren, updateBoard, deleteBoard } from "../controllers/board.controller.js";
+import { createBoard, createColumn, getBoards, getABoardAndChildren, updateBoard, updateColOrder, deleteBoard } from "../controllers/board.controller.js";
 
 
 const boardRoute = Router();
@@ -17,12 +17,6 @@ boardRoute.post(
     createBoard
 );
 
-boardRoute.post(
-    '/:id/columns',
-    body('name').notEmpty().withMessage("Name is Required"),
-    validateInput,
-    createColumn
-)
 
 boardRoute.get(
     '/',
@@ -43,6 +37,20 @@ boardRoute.put(
 boardRoute.delete(
     '/:id',
     deleteBoard
+);
+
+
+
+boardRoute.patch(
+    '/:id/columns/reorder',
+    updateColOrder
+);
+
+boardRoute.post(
+    '/:id/columns',
+    body('name').notEmpty().withMessage("Name is Required"),
+    validateInput,
+    createColumn
 );
 
 

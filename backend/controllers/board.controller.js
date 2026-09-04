@@ -184,14 +184,15 @@ export const deleteBoard = async (req, res) => {
 
         const board = await SBoard.deleteOne({ _id: id, owner: userId });
         const columns = await SColumn.deleteMany({ boardID: id });
+        const tasks = await STask.deleteMany({ boardID: id });
 
-        if(board.deletedCount === 0 && columns.deletedCount === 0) {
+        if(board.deletedCount === 0) {
             const errRes = jsonRes(false, `Board not Found or Not the owner`, null);
             res.status(400).json(errRes);
             return;
         }
 
-        const succRes = jsonRes(true, `Board Deleted Successfully`, { board, columns });
+        const succRes = jsonRes(true, `Board Deleted Successfully`, { board, columns, tasks });
         res.status(200).json(succRes);
 
 
@@ -225,13 +226,67 @@ export const createColumn = async (req, res) => {
 
         const { name } = req.body;
 
-        // const column = await SColumn.create({
-        //     name, boardID: id,
-        // });
+        const lastCol = await SColumn.findOne({ boardID: id })
+                                    .sort({ order: -1 }).lean();
+
+        // console.log(lastCol);
+
+        const newOrder = lastCol ? lastCol.order + 1 : 0;
+
+        const column = await SColumn.create({
+            name, boardID: id, order: newOrder
+        });
+
+        const succRes = jsonRes(true, "Column created successfully", { column, lastCol });
+        res.status(200).json(succRes);
 
 
     } catch (e) {
         const errRes = jsonRes(false, `Failed to create column`, e.message)
+        res.status(400).json(errRes);
+    }
+}
+
+
+export const updateColOrder = async (req, res) => {
+    try {
+
+        const boardID = req.params.id;
+
+        const board = await SBoard.findById(boardID);
+
+        if(!board) {
+            const errRes = jsonRes(false, `Please create a Board`, null)
+            res.status(400).json(errRes);
+            return;
+        }
+
+        const { newColOrders } = req.body;
+
+        if(!newColOrders || !Array.isArray(newColOrders)) {
+            const errRes = jsonRes(false, `Invalid data format`, null)
+            res.status(400).json(errRes);
+            return;
+        }
+
+        const bulkOptions = newColOrders.map((col) => {
+            return {
+                updateOne: {
+                    filter: { _id: col.id, boardID },
+                    update: { $set: { order: col.order } }
+                }
+            }
+        });
+
+        await SColumn.bulkWrite(bulkOptions);
+
+        const succRes = jsonRes(true, "Column Order Updated", null);
+        res.status(200).json(succRes);
+
+
+
+    } catch (e) {
+        const errRes = jsonRes(false, `Failed to change column order`, e.message)
         res.status(400).json(errRes);
     }
 }

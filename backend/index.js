@@ -6,6 +6,8 @@ import { logger } from "./middleware/basic.middleware.js";
 
 import authRoute from './router/auth.router.js'
 import boardRoute from "./router/board.router.js";
+import columnRoute from "./router/column.router.js";
+import taskRoute from "./router/task.router.js";
 
 import { connDB } from "./config/db.config.js";
 
@@ -17,6 +19,8 @@ app.use(cookieParser());
 
 app.use(`${API_PREFIX}/auth`, authRoute);
 app.use(`${API_PREFIX}/board`, boardRoute);
+app.use(`${API_PREFIX}/column`, columnRoute);
+app.use(`${API_PREFIX}/tasks`, taskRoute);
 
 
 (async () => {
