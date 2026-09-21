@@ -7,7 +7,6 @@ import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from "../config/env.config.js";
 export const login = async (req, res) => {
     try {
 
-        console.log("Login")
 
         const { email, password } = req.body;
 
@@ -110,7 +109,6 @@ export const refreshToken = async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
         if(!refreshToken) {
-            console.log(req.cookies);
             const errRes = jsonRes(false, `Not Logged In`, null)
             res.status(400).json(errRes);
             return;

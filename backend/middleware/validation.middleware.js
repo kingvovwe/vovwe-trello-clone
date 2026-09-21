@@ -5,7 +5,7 @@ import { SUser } from "../models/user.model.js";
 
 export const validateInput = (req, res, next) => {
     const errors = validationResult(req);
-    console.log("Validate Input")
+    
     if(!errors.isEmpty()) {
 
         const errRes = jsonRes(false, "Validation Error", errors.array());

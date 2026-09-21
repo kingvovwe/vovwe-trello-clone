@@ -2,7 +2,7 @@ import { Router } from "express"
 import { body } from "express-validator"
 
 import { validateInput, isUserLoggedIn } from "../middleware/validation.middleware.js";
-import { createBoard, createColumn, getBoards, getABoardAndChildren, updateBoard, updateColOrder, deleteBoard } from "../controllers/board.controller.js";
+import { createBoard, createColumn, getBoards, getABoardAndChildren, updateBoard, updateBoardMembers, updateColOrder, deleteBoard } from "../controllers/board.controller.js";
 
 
 const boardRoute = Router();
@@ -32,6 +32,10 @@ boardRoute.get(
 boardRoute.put(
     '/:id',
     updateBoard
+);
+boardRoute.put(
+    '/:id',
+    updateBoardMembers
 );
 
 boardRoute.delete(

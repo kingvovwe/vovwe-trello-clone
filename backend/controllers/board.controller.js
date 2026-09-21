@@ -142,6 +142,37 @@ export const getABoardAndChildren = async (req, res) => {
     }
 }
 
+
+export const updateBoardMembers = async (req, res) => {
+    try {
+
+        const { boardID } = req.params;
+        const userId = req.user._id;
+
+        const board = await SBoard.find({ _id: boardID, owner: userId });
+
+        if(!board) {
+            const errRes = jsonRes(false, `Failed to update members. Only Owners can update members.`, null);
+            res.status(400).json(errRes);
+            return;
+        }
+
+        const members = req.body.members;
+
+        board.members = members;
+
+        await board.save();
+
+        
+        const succRes = jsonRes(true, "Board Members Updated", board);
+        res.status(200).json(succRes);
+
+    } catch (e) {
+        const errRes = jsonRes(false, `Failed to update board members`, e.message)
+        res.status(400).json(errRes);
+    }
+}
+
 export const updateBoard = async (req, res) => {
     try {
 
