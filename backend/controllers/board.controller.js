@@ -146,10 +146,14 @@ export const getABoardAndChildren = async (req, res) => {
 export const updateBoardMembers = async (req, res) => {
     try {
 
-        const { boardID } = req.params;
+        const boardID = req.params.id;
         const userId = req.user._id;
 
-        const board = await SBoard.find({ _id: boardID, owner: userId });
+        console.log(boardID);
+
+        const board = await SBoard.findOne({ _id: boardID, owner: userId });
+
+        console.log(board);
 
         if(!board) {
             const errRes = jsonRes(false, `Failed to update members. Only Owners can update members.`, null);
@@ -158,6 +162,8 @@ export const updateBoardMembers = async (req, res) => {
         }
 
         const members = req.body.members;
+
+        console.log(members);
 
         board.members = members;
 

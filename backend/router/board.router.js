@@ -34,7 +34,9 @@ boardRoute.put(
     updateBoard
 );
 boardRoute.put(
-    '/:id',
+    '/:id/members',
+    body('members').notEmpty().withMessage("Please Enter members"),
+    validateInput,
     updateBoardMembers
 );
 
